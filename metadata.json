@@ -1,0 +1,5 @@
+{
+  "name": "ExamDigitizer AI",
+  "description": "Digitize paper exams into structured JSON using Gemini Vision 2.5. Upload a PDF, extract questions, options, and answers automatically.",
+  "requestFramePermissions": []
+}

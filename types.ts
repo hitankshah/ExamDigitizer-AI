@@ -1,3 +1,4 @@
+
 export interface QuestionOptions {
   A: string;
   B: string;
@@ -14,7 +15,7 @@ export interface ExamQuestion {
 }
 
 export interface ProcessingStatus {
-  step: 'setup' | 'converting' | 'analyzing' | 'exam_active' | 'results' | 'error';
+  step: 'setup' | 'converting' | 'analyzing' | 'review' | 'exam_active' | 'results' | 'error';
   message?: string;
   progress?: number;
 }

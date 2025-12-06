@@ -31,15 +31,19 @@ Return ONLY the valid JSON array.
 export const analyzeExamImages = async (base64Images: string[]): Promise<ExamQuestion[]> => {
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    throw new Error("API Key is missing. Please set process.env.API_KEY.");
+    throw new Error("System configuration error: API Key is missing.");
+  }
+
+  if (!base64Images || base64Images.length === 0) {
+      throw new Error("No image data provided for analysis.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
 
   // Prepare content parts
   const parts = base64Images.map((img) => {
-    // Strip the data:image/jpeg;base64, prefix
-    const data = img.split(',')[1];
+    // Strip the data:image/jpeg;base64, prefix if present
+    const data = img.includes(',') ? img.split(',')[1] : img;
     return {
       inlineData: {
         mimeType: 'image/jpeg',
@@ -99,14 +103,61 @@ export const analyzeExamImages = async (base64Images: string[]): Promise<ExamQue
       }
     });
 
+    if (!response || !response.text) {
+        // Check for safety blocks or other reasons
+        if (response.candidates && response.candidates.length > 0) {
+            const candidate = response.candidates[0];
+            if (candidate.finishReason === 'SAFETY') {
+                throw new Error("The content was blocked by safety filters. Please review the document for sensitive material.");
+            }
+            if (candidate.finishReason === 'OTHER') {
+                throw new Error("AI processing stopped unexpectedly. Please try again.");
+            }
+        }
+        throw new Error("AI returned an empty response. Please try again with a clearer image.");
+    }
+
     const jsonText = response.text;
-    if (!jsonText) throw new Error("No data returned from AI");
 
-    const parsedData = JSON.parse(jsonText);
-    return parsedData as ExamQuestion[];
+    try {
+        const parsedData = JSON.parse(jsonText);
+        
+        if (!Array.isArray(parsedData)) {
+            throw new Error("AI response was not in the expected format (Array).");
+        }
+        
+        if (parsedData.length === 0) {
+            throw new Error("No questions were detected. Ensure the PDF contains clearly formatted multiple-choice questions.");
+        }
 
-  } catch (error) {
+        return parsedData as ExamQuestion[];
+
+    } catch (parseError) {
+        console.error("JSON Parse Error:", parseError, "Raw Response:", jsonText);
+        throw new Error("Failed to interpret the AI results. The document structure might be too complex or unclear.");
+    }
+
+  } catch (error: any) {
     console.error("Gemini Analysis Error:", error);
-    throw new Error("Failed to analyze exam images.");
+    
+    const msg = error.message || '';
+
+    // Handle common API errors with friendly messages
+    if (msg.includes('401') || msg.includes('API key')) {
+        throw new Error("Authentication failed: Invalid API Key. Please check your configuration.");
+    }
+    if (msg.includes('429') || msg.includes('Quota') || msg.includes('Resource exhausted')) {
+        throw new Error("Service quota exceeded. Please try again later.");
+    }
+    if (msg.includes('503') || msg.includes('Overloaded')) {
+        throw new Error("AI Service is temporarily overloaded. Please wait a moment and try again.");
+    }
+    
+    // Pass through specific logical errors thrown above
+    if (msg.includes('safety filters') || msg.includes('No questions') || msg.includes('AI response')) {
+        throw error;
+    }
+
+    throw new Error(`AI Analysis failed: ${msg}`);
   }
 };

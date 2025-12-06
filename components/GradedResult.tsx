@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExamQuestion } from '../types';
-import { CheckCircle2, XCircle, AlertTriangle, Download, RefreshCcw } from 'lucide-react';
+import { CircleCheck, CircleX, TriangleAlert, Download, RefreshCcw } from 'lucide-react';
 
 interface GradedResultProps {
   questions: ExamQuestion[];
@@ -112,11 +112,11 @@ const GradedResult: React.FC<GradedResultProps> = ({ questions, examTitle, onRet
               <div className="flex items-start gap-4 mb-4">
                  <div className="flex-shrink-0">
                     {isCorrect ? (
-                      <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                      <CircleCheck className="w-8 h-8 text-emerald-500" />
                     ) : isMissingKey ? (
-                      <AlertTriangle className="w-8 h-8 text-amber-500" />
+                      <TriangleAlert className="w-8 h-8 text-amber-500" />
                     ) : (
-                      <XCircle className="w-8 h-8 text-red-500" />
+                      <CircleX className="w-8 h-8 text-red-500" />
                     )}
                  </div>
                 <div className="flex-grow">
@@ -170,7 +170,7 @@ const GradedResult: React.FC<GradedResultProps> = ({ questions, examTitle, onRet
               
               {isMissingKey && (
                 <div className="mt-4 pl-12 text-sm text-amber-700 flex items-center">
-                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  <TriangleAlert className="w-4 h-4 mr-2" />
                   AI could not identify the correct answer for grading from the source document.
                 </div>
               )}

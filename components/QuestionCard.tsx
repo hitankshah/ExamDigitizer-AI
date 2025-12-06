@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import { ExamQuestion } from '../types';
-import { CheckCircle2, Circle, AlertTriangle, Edit2 } from 'lucide-react';
+import { CircleCheck, Circle, TriangleAlert } from 'lucide-react';
 
 interface QuestionCardProps {
   question: ExamQuestion;
@@ -40,7 +40,7 @@ const QuestionCard: React.FC<QuestionCardProps> = memo(({ question, index, onUpd
           </span>
           {!question.correctAnswer && (
              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
-               <AlertTriangle className="w-3 h-3 mr-1" />
+               <TriangleAlert className="w-3 h-3 mr-1" />
                Missing Answer
              </span>
           )}
@@ -79,7 +79,7 @@ const QuestionCard: React.FC<QuestionCardProps> = memo(({ question, index, onUpd
                 `}
                 title="Mark as correct answer"
               >
-                {isCorrect ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
+                {isCorrect ? <CircleCheck className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
               </button>
               
               <div className="flex-1">
